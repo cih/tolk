@@ -59,10 +59,10 @@ class SyncTest < ActiveSupport::TestCase
     assert t1.primary_updated?
     assert ! t2.primary_updated?
   end
-  
+
   def test_sync_marks_translations_for_review_when_the_primary_translation_has_changed
     Tolk::Locale.create!(:name => 'es')
-    
+
     phrase = Tolk::Phrase.create! :key => 'number.precision'
     english_translation = phrase.translations.create!(:text => "1", :locale => Tolk::Locale.find_by_name("en"))
     spanish_translation = phrase.translations.create!(:text => "1", :locale => Tolk::Locale.find_by_name("es"))
@@ -74,7 +74,7 @@ class SyncTest < ActiveSupport::TestCase
     Tolk::Locale.expects(:load_translations).returns({'number.precision' => "2"}).at_least_once
     Tolk::Locale.sync! and spanish_translation.reload
     assert spanish_translation.out_of_date?
-    
+
     spanish_translation.text = "2"
     spanish_translation.save! and spanish_translation.reload
     assert spanish_translation.up_to_date?
@@ -182,7 +182,7 @@ class SyncTest < ActiveSupport::TestCase
 
     yaml = ['Saturday', 'Sunday'].to_yaml
     spanish_weekends = spanish.translations.create!(:text => yaml, :phrase => Tolk::Phrase.first)
-    assert_equal YAML.safe_load(yaml), spanish_weekends.text
+    assert_equal YAML.load(yaml), spanish_weekends.text
   end
 
   def test_dump_all_after_sync
@@ -198,7 +198,7 @@ class SyncTest < ActiveSupport::TestCase
     Tolk::Locale.dump_all(tmpdir)
 
     spanish_file = "#{tmpdir}/es.yml"
-    data = YAML::safe_load(IO.read(spanish_file))['es']
+    data = YAML::load(IO.read(spanish_file))['es']
     assert_equal ['hello_world'], data.keys
     assert_equal 'hola', data['hello_world']
   ensure
